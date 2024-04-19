@@ -4,51 +4,71 @@
 #define MAX_SIZE 10
 #define FALSE -2147483647
 #define TRUE 2147483647
+
+typedef struct Node{
+    int data;
+    struct Node* next;
+}Node;
 typedef struct
 {
-    int items[MAX_SIZE];
-    int front;
-    int rear;
+    Node* front;
+    Node* rear;
+    int size;
 } Queus;
-Queus *create_queus()
-{
+
+
+int print_linked_list(struct Node** head){
+    struct Node* temp;
+    temp = *head;
+    while(temp != NULL){
+        printf("%d ", temp->data);
+        temp = temp->next;
+    }
+    printf("\n");
+    return 0;
+}
+
+Queus* create_queus()
+{   
     Queus *queue = (Queus *)malloc(sizeof(Queus));
     if (queue == NULL)
     {
         printf("memory allocation fail");
         exit(-1);
     }
-    queue->front = -1;
-    queue->rear = -1;
+    queue->front = NULL;
+    queue->rear = NULL;
+    queue->size = 0;
     return queue;
 }
 int is_empty(Queus *queue)
 {
-    return queue->front == -1;
-}
-
-int is_full(Queus *queue)
-{
-    return queue->rear >= MAX_SIZE - 1;
+    return queue->front == NULL;
 }
 int get_size(Queus *queue){
-    return queue->rear + 1;
+    return queue->size;
 }
 int enqueu(Queus *queue, int value)
 {
-    if (is_full(queue))
-    {
+    struct Node* node=(struct Node*)malloc(sizeof(struct Node));
+    if (node==NULL){
         printf("queus is Full, Cannot enque %d. \n", value);
         return FALSE;
-    }    
-    else
-    {
-        if (is_empty(queue)){
-            queue->front = 0;
+    }else{
+        node->data=value;
+        node->next=NULL;
+        queue->size++;
+        if (queue->front==NULL){
+            queue->front = node;
+            queue->rear = node;
+            return TRUE;
         }
-        queue->items[++queue->rear] = value;
+        queue->rear->next=node;
+        queue->rear=node;
+        
         return TRUE;
     }
+    
 }
 int dequeu(Queus *queue)
 {
@@ -57,14 +77,14 @@ int dequeu(Queus *queue)
         printf("queus is empty, Cannot deque \n");
         return FALSE;
     }
-    int data=queue->items[queue->front];
-    for (int i = queue->front; i < queue->rear; i++){
-        queue->items[i]=queue->items[i+1];
+    Node* de=queue->front;
+    queue->front=queue->front->next;
+    if (queue->front == NULL){
+        queue->rear == NULL;
     }
-    queue->rear--;
-    if (queue->rear == -1){
-        queue->front = -1; 
-    }
+    int data=de->data;
+    free(de);
+    queue->size--;
     return data;
 }
 void destroy_queus(Queus *queus)
@@ -76,8 +96,9 @@ int main()
     Queus *queue = create_queus();
     printf("size: %d\n",get_size(queue));
     int x = 0;
-    while (enqueu(queue, x) != FALSE)
+    while (x<10)
     {
+        enqueu(queue, x);
         x++;
     }
     printf("size: %d\n",get_size(queue));
